@@ -1,0 +1,1150 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>📋 每日计划清单</title>
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+        font-family: 'Microsoft YaHei', 'Segoe UI', -apple-system, sans-serif;
+        background: transparent;
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        overflow: hidden;
+        user-select: none;
+    }
+
+    /* ===== 便签主体 ===== */
+    .note {
+        width: 100%;
+        min-height: 100vh;
+        background: linear-gradient(165deg, #fff9e6 0%, #fff3cd 100%);
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        cursor: default;
+        box-shadow: -2px 0 20px rgba(0,0,0,0.08);
+    }
+
+    /* 撕纸边缘 */
+    .note::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 12px;
+        background: repeating-linear-gradient(
+            90deg,
+            transparent,
+            transparent 3px,
+            rgba(0,0,0,0.02) 3px,
+            rgba(0,0,0,0.02) 6px
+        );
+    }
+
+    /* 顶部胶带装饰 */
+    .tape {
+        position: absolute;
+        top: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 60px;
+        height: 18px;
+        background: rgba(200,180,150,0.2);
+        border-radius: 0 0 6px 6px;
+        z-index: 5;
+        pointer-events: none;
+    }
+
+    /* ===== 标题栏 (拖拽区域) ===== */
+    .note-header {
+        padding: 24px 22px 10px;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        cursor: grab;
+        flex-shrink: 0;
+        -webkit-app-region: drag;
+    }
+
+    .note-header:active {
+        cursor: grabbing;
+    }
+
+    .note-title-group {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    .note-title {
+        font-size: 20px;
+        font-weight: 700;
+        color: #5a4a3a;
+        letter-spacing: 0.5px;
+    }
+
+    .note-date {
+        font-size: 12px;
+        color: #b8a88a;
+    }
+
+    .note-actions {
+        display: flex;
+        gap: 4px;
+        margin-top: 2px;
+        -webkit-app-region: no-drag;
+    }
+
+    .note-actions button {
+        width: 30px;
+        height: 30px;
+        border: none;
+        border-radius: 6px;
+        background: rgba(0,0,0,0.04);
+        color: #8a7a6a;
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.15s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .note-actions button:hover {
+        background: rgba(0,0,0,0.08);
+        color: #5a4a3a;
+    }
+
+    .note-actions .pin-btn.active {
+        color: #e94560;
+        background: rgba(233,69,96,0.1);
+    }
+
+    .note-actions .min-btn:hover {
+        color: #4ecca3;
+    }
+
+    .note-actions .close-btn:hover {
+        color: #e94560;
+    }
+
+    /* ===== 任务列表 ===== */
+    .note-body {
+        flex: 1;
+        overflow-y: auto;
+        padding: 4px 16px 10px;
+        min-height: 0;
+    }
+
+    .note-body::-webkit-scrollbar {
+        width: 4px;
+    }
+    .note-body::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    .note-body::-webkit-scrollbar-thumb {
+        background: rgba(0,0,0,0.08);
+        border-radius: 2px;
+    }
+
+    /* ===== 日期分组 ===== */
+    .task-group {
+        margin-bottom: 2px;
+    }
+
+    .task-group-header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 8px 4px;
+        font-size: 12px;
+        font-weight: 600;
+        color: #c4b49a;
+        letter-spacing: 0.5px;
+    }
+
+    .task-group-header .line {
+        flex: 1;
+        height: 1px;
+        background: linear-gradient(90deg, #e8dcc8, transparent);
+    }
+
+    /* ===== 任务项 ===== */
+    .task-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 10px;
+        border-radius: 8px;
+        cursor: default;
+        transition: all 0.2s;
+        position: relative;
+    }
+
+    .task-item:hover {
+        background: rgba(255,255,255,0.5);
+    }
+
+    .task-item .checkbox {
+        width: 18px;
+        height: 18px;
+        border: 2px solid #d4c4a8;
+        border-radius: 4px;
+        cursor: pointer;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+        background: rgba(255,255,255,0.5);
+    }
+
+    .task-item .checkbox:hover {
+        border-color: #4ecca3;
+        background: rgba(78,204,163,0.1);
+    }
+
+    .task-item .checkbox.checked {
+        background: #4ecca3;
+        border-color: #4ecca3;
+    }
+
+    .task-item .checkbox.checked::after {
+        content: '✓';
+        color: white;
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    .task-item .task-text {
+        flex: 1;
+        font-size: 14px;
+        color: #5a4a3a;
+        line-height: 1.4;
+        word-break: break-word;
+        transition: all 0.2s;
+        min-width: 0;
+    }
+
+    .task-item .task-text.completed {
+        text-decoration: line-through;
+        color: #c4b49a;
+    }
+
+    .task-item .task-delete {
+        width: 26px;
+        height: 26px;
+        border: none;
+        border-radius: 6px;
+        background: transparent;
+        color: #d4c4a8;
+        font-size: 14px;
+        cursor: pointer;
+        opacity: 0;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .task-item:hover .task-delete {
+        opacity: 1;
+    }
+
+    .task-item .task-delete:hover {
+        background: rgba(233,69,96,0.1);
+        color: #e94560;
+    }
+
+    /* ===== 未来计划标记 ===== */
+    .task-item.future .checkbox {
+        border-style: dashed;
+    }
+
+    .task-item.future .task-text {
+        color: #8a7a6a;
+    }
+
+    .task-item.future .task-text.completed {
+        color: #b8a88a;
+    }
+
+    .task-item .future-badge {
+        font-size: 10px;
+        padding: 1px 6px;
+        border-radius: 4px;
+        background: rgba(69,183,209,0.12);
+        color: #45b7d1;
+        font-weight: 500;
+        flex-shrink: 0;
+        display: none;
+    }
+
+    .task-item.future .future-badge {
+        display: inline;
+    }
+
+    /* ===== 撕纸动画 ===== */
+    .task-item.tearing {
+        animation: tearOff 0.4s ease forwards;
+        pointer-events: none;
+    }
+
+    @keyframes tearOff {
+        0% {
+            transform: scaleY(1) rotate(0);
+            opacity: 1;
+            max-height: 60px;
+            margin-bottom: 0;
+            padding: 8px 10px;
+        }
+        30% {
+            transform: scaleY(1.02) rotate(-1deg);
+            opacity: 1;
+        }
+        100% {
+            transform: scaleY(0) rotate(-6deg);
+            opacity: 0;
+            max-height: 0;
+            margin-bottom: 0;
+            padding: 0 10px;
+        }
+    }
+
+    /* ===== 撕碎纸片粒子 ===== */
+    .particle {
+        position: fixed;
+        pointer-events: none;
+        z-index: 9999;
+        font-size: 16px;
+        animation: particleFly 0.7s ease-out forwards;
+    }
+
+    @keyframes particleFly {
+        0% {
+            opacity: 1;
+            transform: translate(0, 0) rotate(0deg) scale(1);
+        }
+        100% {
+            opacity: 0;
+            transform: translate(var(--tx), var(--ty)) rotate(var(--tr)) scale(0.3);
+        }
+    }
+
+    /* ===== 空状态 ===== */
+    .empty-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 50px 20px;
+        color: #c4b49a;
+    }
+
+    .empty-state .icon {
+        font-size: 48px;
+        margin-bottom: 12px;
+        opacity: 0.5;
+    }
+
+    .empty-state .text {
+        font-size: 14px;
+        text-align: center;
+        line-height: 1.6;
+    }
+
+    /* ===== 底部输入 ===== */
+    .note-footer {
+        padding: 8px 16px 12px;
+        flex-shrink: 0;
+    }
+
+    .add-form {
+        display: flex;
+        gap: 6px;
+        align-items: center;
+        background: rgba(255,255,255,0.5);
+        border: 1.5px solid rgba(0,0,0,0.06);
+        border-radius: 10px;
+        padding: 4px 4px 4px 12px;
+        transition: border-color 0.2s;
+    }
+
+    .add-form:focus-within {
+        border-color: #d4c4a8;
+        background: rgba(255,255,255,0.7);
+    }
+
+    .add-form input {
+        flex: 1;
+        border: none;
+        background: transparent;
+        font-size: 13px;
+        color: #5a4a3a;
+        outline: none;
+        font-family: inherit;
+        padding: 6px 0;
+        min-width: 0;
+    }
+
+    .add-form input::placeholder {
+        color: #c4b49a;
+    }
+
+    .add-form .date-picker-btn {
+        border: none;
+        background: transparent;
+        color: #b8a88a;
+        font-size: 15px;
+        cursor: pointer;
+        padding: 4px 6px;
+        border-radius: 4px;
+        transition: all 0.15s;
+        flex-shrink: 0;
+    }
+
+    .add-form .date-picker-btn:hover {
+        background: rgba(0,0,0,0.04);
+        color: #5a4a3a;
+    }
+
+    .add-form .date-picker-btn.future-active {
+        color: #45b7d1;
+        background: rgba(69,183,209,0.1);
+    }
+
+    .add-form .add-btn {
+        border: none;
+        background: #5a4a3a;
+        color: #fff9e6;
+        font-size: 18px;
+        cursor: pointer;
+        padding: 6px 14px;
+        border-radius: 8px;
+        transition: all 0.15s;
+        font-weight: 600;
+        flex-shrink: 0;
+    }
+
+    .add-form .add-btn:hover {
+        background: #4a3a2a;
+    }
+
+    /* ===== 底部状态 ===== */
+    .note-statusbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 6px 18px 14px;
+        font-size: 11px;
+        color: #b8a88a;
+        flex-shrink: 0;
+    }
+
+    .note-statusbar .count {
+        display: flex;
+        gap: 12px;
+    }
+
+    .note-statusbar .clear-btn {
+        border: none;
+        background: transparent;
+        color: #c4b49a;
+        font-size: 11px;
+        cursor: pointer;
+        padding: 2px 6px;
+        border-radius: 4px;
+        transition: all 0.15s;
+    }
+
+    .note-statusbar .clear-btn:hover {
+        background: rgba(233,69,96,0.08);
+        color: #e94560;
+    }
+
+    /* ===== 日期选择器弹窗 ===== */
+    .date-popup-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 100;
+    }
+    .date-popup-overlay.show { display: block; }
+
+    .date-popup {
+        display: none;
+        position: absolute;
+        bottom: 52px;
+        right: 16px;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 8px 40px rgba(0,0,0,0.15);
+        padding: 8px;
+        z-index: 101;
+        width: 220px;
+    }
+
+    .date-popup.show {
+        display: block;
+    }
+
+    .date-popup .date-option {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 9px 10px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 13px;
+        color: #5a4a3a;
+        transition: background 0.15s;
+    }
+
+    .date-popup .date-option:hover {
+        background: rgba(0,0,0,0.04);
+    }
+
+    .date-popup .date-option .radio {
+        width: 16px;
+        height: 16px;
+        border: 2px solid #d4c4a8;
+        border-radius: 50%;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.15s;
+    }
+
+    .date-popup .date-option .radio.selected {
+        border-color: #45b7d1;
+    }
+
+    .date-popup .date-option .radio.selected::after {
+        content: '';
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #45b7d1;
+    }
+
+    .date-popup .date-option .label-text {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .date-popup .date-option .label-text .sub {
+        font-size: 11px;
+        color: #b8a88a;
+    }
+
+    .date-popup .date-custom {
+        display: flex;
+        gap: 6px;
+        margin-top: 6px;
+        padding-top: 8px;
+        border-top: 1px solid #f0e8dc;
+    }
+
+    .date-popup .date-custom input {
+        flex: 1;
+        border: 1px solid #e0d4c0;
+        border-radius: 6px;
+        padding: 6px 8px;
+        font-size: 12px;
+        font-family: inherit;
+        color: #5a4a3a;
+        outline: none;
+    }
+
+    .date-popup .date-custom input:focus {
+        border-color: #45b7d1;
+    }
+
+    .date-popup .date-custom button {
+        border: none;
+        background: #45b7d1;
+        color: white;
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-size: 12px;
+        cursor: pointer;
+        font-family: inherit;
+    }
+
+    /* 计数 */
+    .count-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 18px;
+        height: 18px;
+        padding: 0 4px;
+        border-radius: 9px;
+        font-size: 10px;
+        font-weight: 600;
+    }
+</style>
+</head>
+<body>
+
+<div class="note" id="note">
+    <div class="tape"></div>
+
+    <!-- 标题栏 -->
+    <div class="note-header" id="dragHandle">
+        <div class="note-title-group">
+            <div class="note-title">📋 每日计划</div>
+            <div class="note-date" id="dateDisplay"></div>
+        </div>
+        <div class="note-actions">
+            <button class="pin-btn" id="pinBtn" title="窗口置顶" onclick="togglePin()">📌</button>
+            <button class="min-btn" title="最小化" onclick="minimizeWin()">─</button>
+            <button class="close-btn" title="关闭" onclick="quitApp()">✕</button>
+        </div>
+    </div>
+
+    <!-- 任务列表 -->
+    <div class="note-body" id="taskList">
+        <!-- JS 渲染 -->
+    </div>
+
+    <!-- 输入区 -->
+    <div class="note-footer">
+        <div class="add-form">
+            <input type="text" id="taskInput" placeholder="写一个任务..."
+                   autocomplete="off" maxlength="200">
+            <button class="date-picker-btn" id="dateBtn" title="选择日期"
+                    onclick="toggleDatePopup()">📅</button>
+            <button class="add-btn" onclick="addTask()">+</button>
+        </div>
+    </div>
+
+    <!-- 底部状态 -->
+    <div class="note-statusbar">
+        <div class="count">
+            <span>待办 <span id="pendingCount">0</span></span>
+            <span>✓ <span id="doneCount" style="color:#4ecca3;font-weight:600">0</span></span>
+        </div>
+        <button class="clear-btn" onclick="clearCompleted()">清除已完成</button>
+    </div>
+
+    <!-- 日期弹窗 -->
+    <div class="date-popup-overlay" id="popupOverlay" onclick="closeDatePopup()"></div>
+    <div class="date-popup" id="datePopup">
+        <div class="date-option" onclick="selectDate('today')">
+            <div class="radio" id="radioToday"></div>
+            <div class="label-text">
+                <span>今天</span>
+                <span class="sub" id="todayLabel"></span>
+            </div>
+        </div>
+        <div class="date-option" onclick="selectDate('tomorrow')">
+            <div class="radio" id="radioTomorrow"></div>
+            <div class="label-text">
+                <span>明天</span>
+                <span class="sub" id="tomorrowLabel"></span>
+            </div>
+        </div>
+        <div class="date-option" onclick="selectDate('future')">
+            <div class="radio" id="radioFuture"></div>
+            <div class="label-text">
+                <span>未来计划</span>
+                <span class="sub">指定日期</span>
+            </div>
+        </div>
+        <div class="date-custom">
+            <input type="date" id="customDate">
+            <button onclick="selectCustomDate()">确定</button>
+        </div>
+    </div>
+</div>
+
+<!-- Windows 拖拽支持 -->
+<div id="dragOverlay" style="display:none;position:fixed;inset:0;z-index:9998;cursor:grabbing;"></div>
+
+<script>
+    // ============ 检测运行环境 ============
+    const IS_DESKTOP = !!(window.pywebview && window.pywebview.api);
+    const API = window.pywebview ? window.pywebview.api : null;
+
+    // ============ 数据层 ============
+    const STORAGE_KEY = 'plan_widget_data';
+
+    let state = {
+        tasks: [],
+        dateCategory: 'today',
+        selectedDate: null,
+        settings: {
+            posX: undefined,
+            posY: undefined,
+            pinned: false,
+        },
+    };
+
+    // ============ 初始化 ============
+    async function init() {
+        loadState();
+
+        // 如果桌面模式，获取置顶状态
+        if (IS_DESKTOP && API) {
+            try {
+                const pinState = await API.get_pin_state();
+                state.settings.pinned = pinState.pinned;
+            } catch(e) {
+                console.log('API call failed:', e);
+            }
+        }
+
+        renderTasks();
+        updateDateDisplay();
+        updateDateLabels();
+        setupInputEvents();
+        setupDrag();
+        updatePinBtn();
+
+        // 初始化日期选择默认值
+        const d = new Date();
+        d.setDate(d.getDate() + 1);
+        document.getElementById('customDate').value = d.toISOString().slice(0, 10);
+    }
+
+    // ============ 存储 ============
+    function loadState() {
+        try {
+            const raw = localStorage.getItem(STORAGE_KEY);
+            if (raw) {
+                const data = JSON.parse(raw);
+                state.tasks = data.tasks || [];
+                state.settings.posX = data.settings ? data.settings.posX : undefined;
+                state.settings.posY = data.settings ? data.settings.posY : undefined;
+            }
+        } catch(e) {}
+    }
+
+    function saveState() {
+        try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify({
+                tasks: state.tasks,
+                settings: { posX: state.settings.posX, posY: state.settings.posY },
+                _updated: new Date().toISOString(),
+            }));
+        } catch(e) {}
+    }
+
+    // ============ 数据类型 ============
+    class Task {
+        constructor(text, dateCategory = 'today', targetDate = null) {
+            this.id = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+            this.text = text.trim();
+            this.done = false;
+            this.dateCategory = dateCategory;
+            this.targetDate = targetDate;
+            this.createdAt = Date.now();
+        }
+    }
+
+    // ============ 日期工具 ============
+    function getTodayStr() {
+        return new Date().toISOString().slice(0, 10);
+    }
+
+    function getTomorrowStr() {
+        const d = new Date();
+        d.setDate(d.getDate() + 1);
+        return d.toISOString().slice(0, 10);
+    }
+
+    function formatDate(dateStr) {
+        if (!dateStr) return '';
+        const d = new Date(dateStr + 'T00:00:00');
+        const weekdays = ['日', '一', '二', '三', '四', '五', '六'];
+        const month = d.getMonth() + 1;
+        const day = d.getDate();
+        const wd = weekdays[d.getDay()];
+        return month + '月' + day + '日 周' + wd;
+    }
+
+    function formatSimple(dateStr) {
+        if (!dateStr) return '';
+        return dateStr.slice(5);
+    }
+
+    function updateDateLabels() {
+        document.getElementById('todayLabel').textContent = formatDate(getTodayStr());
+        document.getElementById('tomorrowLabel').textContent = formatDate(getTomorrowStr());
+    }
+
+    function updateDateDisplay() {
+        const now = new Date();
+        const weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
+        const month = now.getMonth() + 1;
+        const day = now.getDate();
+        const wd = weekdays[now.getDay()];
+        document.getElementById('dateDisplay').textContent = month + '月' + day + '日 ' + wd;
+    }
+
+    // ============ 渲染 ============
+    function renderTasks() {
+        const container = document.getElementById('taskList');
+
+        const groups = {
+            today: { label: '📌 今天', tasks: [] },
+            tomorrow: { label: '🔮 明天', tasks: [] },
+            future: { label: '📅 未来计划', tasks: [] },
+        };
+
+        const sorted = [...state.tasks].sort((a, b) => {
+            if (a.done !== b.done) return a.done ? 1 : -1;
+            return a.createdAt - b.createdAt;
+        });
+
+        for (const task of sorted) {
+            if (task.dateCategory === 'future') {
+                groups.future.tasks.push(task);
+            } else if (task.dateCategory === 'tomorrow') {
+                groups.tomorrow.tasks.push(task);
+            } else {
+                groups.today.tasks.push(task);
+            }
+        }
+
+        let pending = 0, done = 0;
+        state.tasks.forEach(t => { if (t.done) done++; else pending++; });
+        document.getElementById('pendingCount').textContent = pending;
+        document.getElementById('doneCount').textContent = done;
+
+        let html = '';
+        let hasContent = false;
+
+        for (const [, group] of Object.entries(groups)) {
+            if (group.tasks.length === 0) continue;
+            hasContent = true;
+            html += `
+                <div class="task-group">
+                    <div class="task-group-header">
+                        <span>${group.label}</span>
+                        <span class="line"></span>
+                    </div>
+                    ${group.tasks.map(t => renderTaskItem(t)).join('')}
+                </div>
+            `;
+        }
+
+        if (!hasContent) {
+            html = `
+                <div class="empty-state">
+                    <div class="icon">📝</div>
+                    <div class="text">今天还没有任务<br>在下方输入框添加一个吧</div>
+                </div>
+            `;
+        }
+
+        container.innerHTML = html;
+    }
+
+    function renderTaskItem(task) {
+        const isFuture = task.dateCategory !== 'today';
+        const futureClass = isFuture ? 'future' : '';
+        const doneClass = task.done ? 'checked' : '';
+        const textDoneClass = task.done ? 'completed' : '';
+
+        let dateBadge = '';
+        if (task.dateCategory === 'future' && task.targetDate) {
+            dateBadge = `<span class="future-badge">${formatSimple(task.targetDate)}</span>`;
+        } else if (task.dateCategory === 'tomorrow') {
+            dateBadge = `<span class="future-badge">${formatSimple(getTomorrowStr())}</span>`;
+        }
+
+        return `
+            <div class="task-item ${futureClass}" data-id="${task.id}">
+                <div class="checkbox ${doneClass}" onclick="toggleTask('${task.id}')"></div>
+                <span class="task-text ${textDoneClass}">${escapeHtml(task.text)}</span>
+                ${dateBadge}
+                <button class="task-delete" onclick="deleteTask('${task.id}')" title="撕掉">✕</button>
+            </div>
+        `;
+    }
+
+    function escapeHtml(str) {
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+    }
+
+    // ============ 任务操作 ============
+    function addTask() {
+        const input = document.getElementById('taskInput');
+        const text = input.value.trim();
+        if (!text) return;
+
+        let category = state.dateCategory;
+        let targetDate = null;
+
+        if (category === 'future') {
+            targetDate = state.selectedDate || getTomorrowStr();
+        } else if (category === 'tomorrow') {
+            targetDate = getTomorrowStr();
+        }
+
+        if (targetDate === getTodayStr()) {
+            category = 'today';
+            targetDate = null;
+        }
+
+        state.tasks.unshift(new Task(text, category, targetDate));
+        saveState();
+        renderTasks();
+        closeDatePopup();
+
+        input.value = '';
+        input.focus();
+    }
+
+    function toggleTask(id) {
+        const task = state.tasks.find(t => t.id === id);
+        if (!task) return;
+        task.done = !task.done;
+        saveState();
+        renderTasks();
+    }
+
+    function deleteTask(id) {
+        const el = document.querySelector(`.task-item[data-id="${id}"]`);
+        const task = state.tasks.find(t => t.id === id);
+
+        if (el && task) {
+            createTearEffect(el);
+            el.classList.add('tearing');
+            setTimeout(() => {
+                state.tasks = state.tasks.filter(t => t.id !== id);
+                saveState();
+                renderTasks();
+            }, 400);
+        } else {
+            state.tasks = state.tasks.filter(t => t.id !== id);
+            saveState();
+            renderTasks();
+        }
+    }
+
+    function clearCompleted() {
+        const completedTasks = state.tasks.filter(t => t.done);
+        if (completedTasks.length === 0) return;
+
+        const items = document.querySelectorAll('.task-item');
+        let delay = 0;
+        items.forEach(el => {
+            const id = el.dataset.id;
+            const task = state.tasks.find(t => t.id === id);
+            if (task && task.done) {
+                setTimeout(() => {
+                    createTearEffect(el);
+                    el.classList.add('tearing');
+                }, delay);
+                delay += 60;
+            }
+        });
+
+        setTimeout(() => {
+            state.tasks = state.tasks.filter(t => !t.done);
+            saveState();
+            renderTasks();
+        }, delay + 400);
+    }
+
+    // ============ 撕纸粒子 ============
+    function createTearEffect(el) {
+        const rect = el.getBoundingClientRect();
+        const emojis = ['📄', '📃', '✂️', '📋', '✨'];
+        for (let i = 0; i < 4; i++) {
+            const p = document.createElement('div');
+            p.className = 'particle';
+            p.textContent = emojis[i];
+            p.style.left = (rect.left + Math.random() * rect.width) + 'px';
+            p.style.top = (rect.top + Math.random() * rect.height) + 'px';
+            p.style.setProperty('--tx', (Math.random() * 60 - 30) + 'px');
+            p.style.setProperty('--ty', (Math.random() * 50 + 20) + 'px');
+            p.style.setProperty('--tr', (Math.random() * 360) + 'deg');
+            document.body.appendChild(p);
+            setTimeout(() => p.remove(), 700);
+        }
+    }
+
+    // ============ 日期选择 ============
+    function toggleDatePopup() {
+        const popup = document.getElementById('datePopup');
+        const overlay = document.getElementById('popupOverlay');
+        const isOpen = popup.classList.contains('show');
+        if (isOpen) {
+            closeDatePopup();
+        } else {
+            updateDateLabels();
+            updateRadioSelection();
+            popup.classList.add('show');
+            overlay.classList.add('show');
+        }
+    }
+
+    function closeDatePopup() {
+        document.getElementById('datePopup').classList.remove('show');
+        document.getElementById('popupOverlay').classList.remove('show');
+    }
+
+    function selectDate(category) {
+        state.dateCategory = category;
+        if (category === 'future') {
+            const d = new Date();
+            d.setDate(d.getDate() + 1);
+            state.selectedDate = d.toISOString().slice(0, 10);
+            document.getElementById('customDate').value = state.selectedDate;
+        } else {
+            state.selectedDate = null;
+        }
+        updateRadioSelection();
+        updateDateBtnVisual();
+    }
+
+    function selectCustomDate() {
+        const val = document.getElementById('customDate').value;
+        if (!val) return;
+        state.dateCategory = 'future';
+        state.selectedDate = val;
+        updateRadioSelection();
+        updateDateBtnVisual();
+    }
+
+    function updateRadioSelection() {
+        document.getElementById('radioToday').classList.toggle('selected', state.dateCategory === 'today');
+        document.getElementById('radioTomorrow').classList.toggle('selected', state.dateCategory === 'tomorrow');
+        document.getElementById('radioFuture').classList.toggle('selected', state.dateCategory === 'future');
+    }
+
+    function updateDateBtnVisual() {
+        const btn = document.getElementById('dateBtn');
+        if (state.dateCategory === 'today') {
+            btn.textContent = '📅';
+            btn.classList.remove('future-active');
+        } else {
+            btn.classList.add('future-active');
+            btn.textContent = state.dateCategory === 'tomorrow' ? '🔮' : '📅';
+        }
+    }
+
+    // ============ 输入事件 ============
+    function setupInputEvents() {
+        const input = document.getElementById('taskInput');
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                addTask();
+            }
+        });
+        input.addEventListener('focus', closeDatePopup);
+    }
+
+    // ============ 拖拽（桌面版用 JS 拖拽） ============
+    function setupDrag() {
+        const handle = document.getElementById('dragHandle');
+        const note = document.getElementById('note');
+        const overlay = document.getElementById('dragOverlay');
+        let isDragging = false;
+        let startX, startY;
+
+        handle.addEventListener('mousedown', (e) => {
+            if (e.target.closest('button') || e.target.closest('.note-actions')) return;
+            isDragging = true;
+            startX = e.clientX;
+            startY = e.clientY;
+            handle.style.cursor = 'grabbing';
+
+            if (IS_DESKTOP) {
+                overlay.style.display = 'block';
+            }
+            e.preventDefault();
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isDragging || !IS_DESKTOP) return;
+
+            if (window.pywebview && window.pywebview.move) {
+                window.pywebview.move(e.screenX - startX, e.screenY - startY);
+            }
+        });
+
+        document.addEventListener('mouseup', (e) => {
+            if (!isDragging) return;
+            isDragging = false;
+            handle.style.cursor = 'grab';
+            overlay.style.display = 'none';
+
+            // 保存位置
+            if (IS_DESKTOP && API) {
+                try {
+                    API.save_position(e.screenX - startX, e.screenY - startY);
+                } catch(ex) {
+                    // ignore
+                }
+            }
+        });
+    }
+
+    // ============ 置顶 ============
+    async function togglePin() {
+        state.settings.pinned = !state.settings.pinned;
+
+        if (IS_DESKTOP && API) {
+            try {
+                const result = await API.toggle_pin();
+                state.settings.pinned = result.pinned;
+            } catch(e) {
+                console.log('Toggle pin failed:', e);
+            }
+        }
+
+        updatePinBtn();
+        saveState();
+    }
+
+    function updatePinBtn() {
+        const btn = document.getElementById('pinBtn');
+        btn.classList.toggle('active', state.settings.pinned);
+    }
+
+    // ============ 窗口控制 ============
+    function minimizeWin() {
+        if (IS_DESKTOP && API) {
+            API.minimize_window();
+        }
+    }
+
+    function quitApp() {
+        if (IS_DESKTOP && API) {
+            API.quit_app();
+        }
+    }
+
+    // ============ 键盘 ============
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeDatePopup();
+        if (e.key === 'Enter' && document.activeElement?.tagName !== 'INPUT') {
+            document.getElementById('taskInput').focus();
+        }
+    });
+
+    // ============ 启动 ============
+    if (document.readyState !== 'loading') {
+        init();
+    } else {
+        document.addEventListener('DOMContentLoaded', init);
+    }
+</script>
+</body>
+</html>
