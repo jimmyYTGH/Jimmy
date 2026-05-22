@@ -11,70 +11,113 @@ const fadeInUp = {
 
 export default function About() {
   return (
-    <section id="about" className="relative px-6 py-24">
-      <div className="mx-auto max-w-4xl">
-        <motion.h2
-          className="font-heading text-4xl font-bold sm:text-5xl"
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-80px" }}
-          variants={fadeInUp}
-          custom={0}
-        >
-          <span className="bg-gradient-to-r from-[#00f0ff] to-[#a855f7] bg-clip-text text-transparent">
-            About Me
-          </span>
-        </motion.h2>
+    <div className="mx-auto max-w-5xl px-6 py-28">
+      <motion.p
+        className="font-mono text-sm tracking-[0.3em] text-[#00f0ff]/70"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true }}
+        variants={fadeInUp}
+        custom={0}
+      >
+        ABOUT
+      </motion.p>
 
+      <motion.h2
+        className="mt-3 font-heading text-4xl font-bold sm:text-5xl lg:text-6xl"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true }}
+        variants={fadeInUp}
+        custom={0}
+      >
+        <span
+          style={{
+            background: "linear-gradient(135deg, #00f0ff, #a855f7)",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+          }}
+        >
+          About Me
+        </span>
+      </motion.h2>
+
+      <div className="mt-14 grid gap-10 md:grid-cols-5">
+        {/* Main text - spans 3 cols */}
         <motion.div
-          className="mt-10 grid gap-8 md:grid-cols-2"
+          className="md:col-span-3"
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: true, margin: "-80px" }}
+          viewport={{ once: true }}
+          variants={fadeInUp}
+          custom={1}
         >
-          <motion.div variants={fadeInUp} custom={1}>
-            <h3 className="font-heading text-xl font-semibold text-[#00f0ff]">
-              Who I Am
-            </h3>
-            <p className="mt-4 leading-relaxed text-[#94a3b8]">
-              I'm a passionate full-stack developer with a keen eye for design
-              and user experience. I love building products that make a
-              difference, combining clean code with beautiful interfaces.
-            </p>
-            <p className="mt-4 leading-relaxed text-[#94a3b8]">
-              With experience across the entire development stack, I bridge the
-              gap between design and engineering to create seamless digital
-              experiences.
-            </p>
-          </motion.div>
+          <p className="text-lg leading-relaxed text-[#b0bec5]">
+            I'm a passionate full-stack developer who thrives at the
+            intersection of engineering and design. I build performant,
+            accessible, and beautiful digital experiences that users love.
+          </p>
+          <p className="mt-5 text-lg leading-relaxed text-[#b0bec5]">
+            With deep experience across the modern web stack, I bring ideas
+            from concept to production — always with clean code, thoughtful
+            architecture, and pixel-perfect execution.
+          </p>
+        </motion.div>
 
-          <motion.div variants={fadeInUp} custom={2}>
-            <h3 className="font-heading text-xl font-semibold text-[#a855f7]">
-              Education & Experience
-            </h3>
-            <ul className="mt-4 space-y-4">
-              <li className="rounded-lg border border-[#00f0ff]/10 bg-[#0f172a]/50 p-4">
-                <p className="font-medium text-white">B.S. Computer Science</p>
-                <p className="text-sm text-[#94a3b8]">
-                  University Name • 2020 - 2024
-                </p>
-              </li>
-              <li className="rounded-lg border border-[#a855f7]/10 bg-[#0f172a]/50 p-4">
-                <p className="font-medium text-white">Full-Stack Developer</p>
-                <p className="text-sm text-[#94a3b8]">
-                  Company Name • 2024 - Present
-                </p>
-              </li>
-              <li className="rounded-lg border border-[#00f0ff]/10 bg-[#0f172a]/50 p-4">
-                <p className="font-medium text-white">Frontend Intern</p>
-                <p className="text-sm text-[#94a3b8]">
-                  Company Name • Summer 2023
-                </p>
-              </li>
-            </ul>
-          </motion.div>
+        {/* Timeline cards - spans 2 cols */}
+        <motion.div
+          className="space-y-4 md:col-span-2"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          variants={fadeInUp}
+          custom={2}
+        >
+          {[
+            {
+              year: "2024 - Present",
+              title: "Full-Stack Developer",
+              org: "Company Name",
+              color: "#00f0ff",
+            },
+            {
+              year: "Summer 2023",
+              title: "Frontend Intern",
+              org: "Company Name",
+              color: "#a855f7",
+            },
+            {
+              year: "2020 - 2024",
+              title: "B.S. Computer Science",
+              org: "University Name",
+              color: "#00f0ff",
+            },
+          ].map((item, i) => (
+            <div
+              key={i}
+              className="group relative overflow-hidden rounded-2xl border border-white/[0.06] bg-white/[0.03] p-5 transition-all duration-300 hover:bg-white/[0.06]"
+              style={{ borderLeft: `2px solid ${item.color}40` }}
+            >
+              <span
+                className="font-mono text-xs tracking-wider"
+                style={{ color: item.color }}
+              >
+                {item.year}
+              </span>
+              <p className="mt-1 font-heading font-semibold text-white">
+                {item.title}
+              </p>
+              <p className="text-sm text-[#94a3b8]">{item.org}</p>
+
+              {/* Decorative dot */}
+              <div
+                className="absolute top-5 right-5 size-2 rounded-full opacity-40 transition-opacity group-hover:opacity-80"
+                style={{ background: item.color }}
+              />
+            </div>
+          ))}
         </motion.div>
       </div>
-    </section>
+    </div>
   );
 }

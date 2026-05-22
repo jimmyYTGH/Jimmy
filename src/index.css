@@ -11,7 +11,7 @@
   --font-body: "Inter", sans-serif;
 }
 
-/* Custom cursor */
+/* Hide native cursor globally */
 * {
   cursor: none !important;
 }
@@ -19,26 +19,110 @@
 body {
   margin: 0;
   font-family: var(--font-body);
-  background: linear-gradient(to bottom, #020617, #0f172a, #0369a1);
   color: var(--color-text-primary);
   min-height: 100vh;
   overflow-x: hidden;
+  background: #020617;
 }
 
-/* Grid background overlay */
+/* ── Animated flowing gradient background ── */
 body::before {
   content: "";
   position: fixed;
-  inset: 0;
-  background-image:
-    linear-gradient(rgba(0, 240, 255, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0, 240, 255, 0.03) 1px, transparent 1px);
-  background-size: 60px 60px;
-  pointer-events: none;
+  inset: -50%;
   z-index: 0;
+  background: linear-gradient(
+    135deg,
+    #020617 0%,
+    #0f172a 20%,
+    #1e0947 40%,
+    #0c4a6e 55%,
+    #0f172a 70%,
+    #1a0533 85%,
+    #020617 100%
+  );
+  background-size: 300% 300%;
+  animation: gradientFlow 18s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes gradientFlow {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  25% {
+    background-position: 100% 0%;
+  }
+  50% {
+    background-position: 100% 100%;
+  }
+  75% {
+    background-position: 0% 100%;
+  }
+}
+
+/* ── Floating orbs for depth ── */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 800px 600px at 20% 30%, rgba(0, 240, 255, 0.04) 0%, transparent 100%),
+    radial-gradient(ellipse 600px 800px at 80% 70%, rgba(168, 85, 247, 0.05) 0%, transparent 100%),
+    radial-gradient(ellipse 500px 500px at 50% 50%, rgba(0, 240, 255, 0.02) 0%, transparent 100%);
+  animation: orbsFloat 20s ease-in-out infinite;
+}
+
+@keyframes orbsFloat {
+  0%,
+  100% {
+    opacity: 0.8;
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    opacity: 1;
+    transform: translate(30px, -20px) scale(1.1);
+  }
+  66% {
+    opacity: 0.7;
+    transform: translate(-20px, 15px) scale(0.9);
+  }
+}
+
+/* ── Grid overlay ── */
+.grid-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image: linear-gradient(
+      rgba(0, 240, 255, 0.025) 1px,
+      transparent 1px
+    ),
+    linear-gradient(90deg, rgba(0, 240, 255, 0.025) 1px, transparent 1px);
+  background-size: 80px 80px;
+  mask-image: radial-gradient(ellipse at center, black 40%, transparent 80%);
+  -webkit-mask-image: radial-gradient(ellipse at center, black 40%, transparent 80%);
+}
+
+/* ── Smooth scroll ── */
+html {
+  scroll-behavior: smooth;
 }
 
 #root {
   position: relative;
   z-index: 1;
+}
+
+/* ── Scroll-triggered section hiding ── */
+.section-wrapper {
+  transition: opacity 0.5s ease, filter 0.5s ease;
+}
+.section-hidden {
+  opacity: 0.15;
+  filter: blur(2px);
 }

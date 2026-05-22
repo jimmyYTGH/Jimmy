@@ -1,0 +1,9 @@
+两种方式回到这个版本：
+
+  # 方式 1：通过标签
+  git checkout v1.0.0
+
+  # 方式 2：通过分支
+  git checkout portfolio-v1
+
+  GitHub 上查看：https://github.com/jimmyYTGH/Jimmy/tree/portfolio-v1
