@@ -55,13 +55,12 @@ export default function Hero() {
               animation: "shimmer 4s linear infinite",
             }}
           >
-            Your Name
+            庞力
           </span>
         </h1>
 
         <p className="mx-auto mt-6 max-w-xl text-lg leading-relaxed text-[#94a3b8] sm:text-xl">
-          Full-Stack Developer & Creative Coder — building digital experiences
-          at the intersection of design and technology.
+          游戏狂热爱好者 · 轻度影迷 · INFP · Vibe Coding 糕手
         </p>
 
         <div className="mt-10 flex items-center justify-center gap-5">
@@ -70,7 +69,7 @@ export default function Hero() {
             className="group relative overflow-hidden rounded-2xl px-8 py-3.5 font-medium text-[#020617] transition-all duration-300 hover:scale-105"
             style={{ background: "linear-gradient(135deg, #00f0ff, #06b6d4)" }}
           >
-            <span className="relative z-10">View Projects</span>
+            <span className="relative z-10">查看项目</span>
             <div className="absolute inset-0 z-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
               style={{ background: "linear-gradient(135deg, #22d3ee, #a855f7)" }} />
           </a>
@@ -78,7 +77,7 @@ export default function Hero() {
             href="#contact"
             className="rounded-2xl border border-[#a855f7]/40 px-8 py-3.5 font-medium text-[#a855f7] transition-all duration-300 hover:border-[#a855f7]/80 hover:bg-[#a855f7]/10 hover:scale-105"
           >
-            Contact Me
+            联系我
           </a>
         </div>
       </motion.div>

@@ -36,7 +36,7 @@ export default function Projects() {
             WebkitTextFillColor: "transparent",
           }}
         >
-          Projects
+          项目
         </span>
       </motion.h2>
 
@@ -93,7 +93,7 @@ export default function Projects() {
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  <ExternalLink size={15} /> Demo
+                  <ExternalLink size={15} /> 演示
                 </a>
               )}
               {project.github && (
@@ -103,7 +103,7 @@ export default function Projects() {
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  <GitHubIcon size={15} /> Code
+                  <GitHubIcon size={15} /> 代码
                 </a>
               )}
             </div>

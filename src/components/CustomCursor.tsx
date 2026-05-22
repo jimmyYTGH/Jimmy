@@ -29,9 +29,9 @@ export default function CustomCursor() {
       dotPos.x += (mouse.x - dotPos.x) * 0.45;
       dotPos.y += (mouse.y - dotPos.y) * 0.45;
 
-      // Gradient ball — slow heavy spring (laggy feel)
-      ballPos.x += (mouse.x - ballPos.x) * 0.055;
-      ballPos.y += (mouse.y - ballPos.y) * 0.055;
+      // Gradient ball — smooth trailing spring
+      ballPos.x += (mouse.x - ballPos.x) * 0.12;
+      ballPos.y += (mouse.y - ballPos.y) * 0.12;
 
       // Scale spring
       targetScale = isHovered ? 2.4 : 1;
@@ -61,14 +61,17 @@ export default function CustomCursor() {
       }
     };
 
+    const defaultBg =
+      "radial-gradient(circle, rgba(168,85,247,0.5) 0%, rgba(0,240,255,0.2) 60%, transparent 100%)";
+
     const onOut = (e: MouseEvent) => {
       const el = (e.target as HTMLElement)?.closest(
         'a, button, input, textarea, select, [role="button"], [tabindex]:not([tabindex="-1"])'
       );
       if (el) {
         isHovered = false;
-        ball.style.background = "";
-        ball.style.boxShadow = "";
+        ball.style.background = defaultBg;
+        ball.style.boxShadow = "none";
       }
     };
 
@@ -93,11 +96,12 @@ export default function CustomCursor() {
       />
       <div
         ref={ballRef}
-        className="pointer-events-none fixed top-0 left-0 z-[9998] size-6 rounded-full transition-all duration-150"
+        className="pointer-events-none fixed top-0 left-0 z-[9998] size-6 rounded-full"
         style={{
           background:
             "radial-gradient(circle, rgba(168,85,247,0.5) 0%, rgba(0,240,255,0.2) 60%, transparent 100%)",
           filter: "blur(0.5px)",
+          transition: "background 200ms, box-shadow 200ms",
         }}
       />
     </>

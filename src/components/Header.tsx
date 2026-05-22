@@ -2,10 +2,10 @@ import { useState, useEffect } from "react";
 import { Menu, X } from "lucide-react";
 
 const navLinks = [
-  { label: "About", href: "#about" },
-  { label: "Skills", href: "#skills" },
-  { label: "Projects", href: "#projects" },
-  { label: "Contact", href: "#contact" },
+  { label: "关于", href: "#about" },
+  { label: "技能", href: "#skills" },
+  { label: "项目", href: "#projects" },
+  { label: "联系", href: "#contact" },
 ];
 
 export default function Header() {
@@ -38,7 +38,7 @@ export default function Header() {
             filter: "drop-shadow(0 0 12px rgba(0,240,255,0.5))",
           }}
         >
-          PORTFOLIO
+          PANG LI
         </a>
 
         <ul className="hidden items-center gap-8 md:flex">

@@ -11,7 +11,7 @@ export default function Footer() {
     <footer className="border-t border-white/[0.04] px-6 py-10">
       <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-6 sm:flex-row">
         <p className="text-sm text-[#64748b]">
-          &copy; {new Date().getFullYear()} Your Name. All rights reserved.
+          &copy; {new Date().getFullYear()} 庞力. All rights reserved.
         </p>
 
         <div className="flex items-center gap-1">
